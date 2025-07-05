@@ -43,11 +43,11 @@ import (
 
 func main() {
 	// Автогенерация параметров
-	r, x0, p, q, _ := chaosencrypt.GenerateSecureParams()
+	r, x0, p, q, _ := xorozon.GenerateSecureParams()
 	
 	// Шифрование строки
 	msg := "Hello, Chaos!"
-	encrypted, key, _ := chaosencrypt.EncryptString(msg, r, x0, p, q)
+	encrypted, key, _ := xorozon.EncryptString(msg, r, x0, p, q)
 	
 	fmt.Printf("Key: %x\n", key)
 	fmt.Printf("Encrypted: %x\n", encrypted)
