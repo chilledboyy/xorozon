@@ -2,6 +2,7 @@ package xorozon
 
 import (
 	"crypto/rand"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
 )
@@ -24,10 +25,16 @@ func BLogisticMap(n int, r, x0, p, q float64) []float64 {
 
 		sequence[i] = r * sequence[i-1] * (1 - sequence[i-1]) * d
 		if sequence[i] <= 0 || sequence[i] >= 1 {
-			sequence[i] = 0.5
+			// Генерация случайного float64 между 0.1 и 1.0
+			buf := make([]byte, 8)
+			if _, err := rand.Read(buf); err == nil {
+				u := binary.BigEndian.Uint64(buf)
+				sequence[i] = 0.1 + float64(u)/(1<<64)*0.9 // [0.1, 1.0)
+			} else {
+				sequence[i] = 0.5 // fallback значение при ошибке
+			}
 		}
 	}
-
 	return sequence
 }
 
@@ -70,7 +77,7 @@ func Decrypt(data, key []byte) ([]byte, error) {
 func GenerateSecureParams() (r, x0, p, q float64, err error) {
 	buf := make([]byte, 32)
 	if _, err = rand.Read(buf); err != nil {
-		return
+		return 0, 0, 0, 0, errors.New("не удалось сгенерировать случайные данные:" + err.Error())
 	}
 
 	r = 3.57 + 0.43*float64(buf[0])/255.0
